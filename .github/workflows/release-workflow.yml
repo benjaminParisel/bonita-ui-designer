@@ -29,6 +29,14 @@ jobs:
           id: Changelog
           env:
             REPO: ${{ github.repository }}
+      - name: Get current Version
+        shell: bash
+        run: echo "##[set-output name=version;]${grep -Po -m1 '(?<=<version>).*(?=</version>)' pom.xml}
+        id: current_version
+      - name: get next version
+        shell: bash
+        run: echo "##[set-output name=version;]${  echo "${git tag -l ${echo ${{ steps.next_version.outputs.version }} | grep -P '\d{1,}\.\d{1,}' -o}.* | sort --version-sort | tail -1%.*}.$((${git tag -l ${echo ${{ steps.next_version.outputs.version }} | grep -P '\d{1,}\.\d{1,}' -o}.* | sort --version-sort | tail -1##*.}+1))"}
+        id: next_version
       - name: Update Version
         shell: bash
         run: ./script/update-version.sh ${{ steps.next_version.outputs.version }}
