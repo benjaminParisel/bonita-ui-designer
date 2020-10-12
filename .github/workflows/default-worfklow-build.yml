@@ -2,11 +2,9 @@ name: CI MASTER
 
 on:
   push:
-   branch:
-    - master
+   branch: [master]
   pull_request:
-   branch:
-    - master
+   branch: [master]
 
 jobs:
   build:
@@ -22,7 +20,7 @@ jobs:
       #        run: mvn -B clean verify -Pe2e,integration-test
       - name: Test CI MASTER
         shell: bash
-        run: echo 'Test CI MASTER'
+        run: echo 'Test CI MASTER new'
 #      - uses: 8398a7/action-slack@v3
 #        with:
 #          status: ${{ job.status }}
