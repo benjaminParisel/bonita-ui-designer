@@ -24,7 +24,7 @@ jobs:
         with:
           name: ui-designer binary
           path: |
-            community/backend/target/ui-designer-*.jar
+            backend/webapp/target/*-standalone.jar
       - name: Test CI MASTER
         shell: bash
         run: echo 'Test CI MASTER new'
