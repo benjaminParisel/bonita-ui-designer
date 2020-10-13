@@ -25,13 +25,13 @@ jobs:
           path: |
             backend/webapp/target/*-standalone.jar
       - name: Slack Notification
-          uses: rtCamp/action-slack-notify@master
-          env:
-            SLACK_CHANNEL: C01CHJ6V091
-            SLACK_COLOR: '#3278BD'
-            SLACK_ICON: https://github.com/rtCamp.png?size=48
-            SLACK_MESSAGE: 'Post Content :rocket:'
-            SLACK_TITLE: Post Title
-            SLACK_USERNAME: Brigitte
-            SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always() # Pick up events even if the job fails or is canceled.
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_CHANNEL: C01CHJ6V091
+          SLACK_COLOR: '#3278BD'
+          SLACK_ICON: https://github.com/rtCamp.png?size=48
+          SLACK_MESSAGE: 'Post Content :rocket:'
+          SLACK_TITLE: Post Title
+          SLACK_USERNAME: Brigitte
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always() # Pick up events even if the job fails or is canceled..
