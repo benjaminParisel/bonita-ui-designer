@@ -24,14 +24,10 @@ jobs:
 #        with:
 #          path: |
 #            backend/webapp/target/*-standalone.jar
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_CHANNEL: test-gh-action
-          SLACK_COLOR: '#3278BD'
-          SLACK_ICON: https://github.com/rtCamp.png?size=48
-          SLACK_MESSAGE: 'toto'
-          SLACK_TITLE: Post Title
-          SLACK_USERNAME: Brigitte
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always() # Pick up events even if the job fails or is canceled..
+      - name: Send message to Slack API
+        uses: archive/github-actions-slack@v1.0.3
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack-channel: test-gh-action
+          slack-text: Hello! Something is burning! Or not...
+          slack-optional-icon_emoji: ":fire:"
