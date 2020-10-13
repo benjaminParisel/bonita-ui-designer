@@ -31,5 +31,5 @@ jobs:
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack-channel: test-gh-action
-          slack-text: Hello! Something is burning on ${{ job }} ! Or not...
+          slack-text: Hello! Something is burning on https://github.com/$${{ github.repository }}/actions/runs/${{ github.run_id }} ! Or not...
           slack-optional-icon_emoji: ":fire:"
