@@ -31,4 +31,3 @@ jobs:
           slack-channel: test-gh-action
           slack-text: Hello! Something is burning on ${{ github.repository }} ! Or not...
           slack-optional-icon_emoji: ":fire:"
-      if: ${{ failure() &&  }}
