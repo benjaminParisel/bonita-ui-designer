@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-   branch: [master, dev, release-*]
+   branch: master
   pull_request:
-   branch: [master, dev, release-*]
+   branch: master
 
 jobs:
   build:
@@ -29,5 +29,6 @@ jobs:
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack-channel: test-gh-action
-          slack-text: Hello! Something is burning! Or not...
+          slack-text: Hello! Something is burning on ${{ github.repository }} ! Or not...
           slack-optional-icon_emoji: ":fire:"
+      if: ${{ failure() &&  }}
