@@ -1,4 +1,10 @@
-# Bonita UI designer [![Build Status](https://travis-ci.org/bonitasoft/bonita-ui-designer.svg?branch=master)](https://travis-ci.org/bonitasoft/bonita-ui-designer)
+# Bonita UI designer 
+
+[![Build Status](https://travis-ci.org/bonitasoft/bonita-ui-designer.svg?branch=master)](https://travis-ci.org/bonitasoft/bonita-ui-designer) 
+ ![example workflow name](https://github.com/benjaminParisel/bonita-ui-designer/workflows/Build/badge.svg)
+ [![GitHub release](https://img.shields.io/github/v/tag/benjaminParisel/bonita-ui-designer?label=Release)](https://github.com/benjaminParisel/bonita-ui-designer/releases)
+
+
 
 The WYSIWYG web editor by Bonita.
 //TODO screenshot
