@@ -33,13 +33,10 @@ jobs:
 #          slack-channel: test-gh-action
 #          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Or not Test...
 #          slack-optional-icon_emoji: ":fire:"
-        uses: 8398a7/action-slack@v3.8.0
+        uses: act10ns/slack@v1
         with:
           status: ${{ job.status }}
-          channel: '#C01CHJ6V091'
-          author_name: ${{ github.event_path }}
-          icon_emoji: ':rocket:'
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
+          channel: '#test-gh-action'
+          if: always()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          if: always()
