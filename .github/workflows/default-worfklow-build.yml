@@ -18,18 +18,30 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
-      - name: Build with Maven
+#      - name: Build with Maven
 #       run: mvn -B clean verify -Pe2e,integration-test
-        run: ./mvnw -B clean verify -DskipTests
-      - name: Archive production artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: |
-            backend/webapp/target/*-standalone.jar
+#        run: ./mvnw -B clean verify -DskipTests
+#      - name: Archive production artifacts
+#        uses: actions/upload-artifact@v2
+#        with:
+#          path: |
+#            backend/webapp/target/*-standalone.jar
       - name: Send message to Slack API
-        uses: archive/github-actions-slack@v1.0.3
+#        uses: archive/github-actions-slack@v1.0.3
+#        with:
+#          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
+#          slack-channel: test-gh-action
+#          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Or not Test...
+#          slack-optional-icon_emoji: ":fire:"
+        uses: 8398a7/action-slack@v3
         with:
-          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
-          slack-channel: test-gh-action
-          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Or not Test...
-          slack-optional-icon_emoji: ":fire:"
+          status: ${{ job.status }}
+          channel: 'C01CHJ6V091'
+          author_name: ${{ github.event_path }}
+          icon_emoji: ':rocket:'
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          if: always()
