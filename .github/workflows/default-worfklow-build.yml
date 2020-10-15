@@ -4,9 +4,13 @@ on:
   push:
    branch:
     - master
+    - dev
+    - release-*
   pull_request:
    branch:
     - master
+    - dev
+    - release-*
 
 jobs:
   build:
@@ -18,25 +22,20 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
-#      - name: Build with Maven
-#       run: mvn -B clean verify -Pe2e,integration-test
-#        run: ./mvnw -B clean verify -DskipTests
-#      - name: Archive production artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          path: |
-#            backend/webapp/target/*-standalone.jar
-      - name: Send message to Slack API
-#        uses: archive/github-actions-slack@v1.0.3
-#        with:
-#          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
-#          slack-channel: test-gh-action
-#          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Or not Test...
-#          slack-optional-icon_emoji: ":fire:"
-        uses: act10ns/slack@v1
+      - name: Build with Maven
+        run: mvn -B clean verify -Pe2e,integration-test
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
         with:
-          status: ${{ job.status }}
-          channel: '#test-gh-action'
-          if: always()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          path: |
+            backend/webapp/target/*-standalone.jar
+        if: ${{ github.ref }} == 'refs/heads/master' || ${{ github.ref }} == 'refs/heads/dev'
+      - name: Send message to Slack API
+        uses: archive/github-actions-slack@v1.0.3
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack-channel: test-gh-action
+          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Or not Test...
+          slack-optional-icon_emoji: ":fire:"
+        if: (${{ github.ref }} == 'refs/heads/master' || ${{ github.ref }} == 'refs/heads/dev') && failed()
+
