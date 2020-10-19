@@ -36,6 +36,7 @@ echo "Changing version from $CUR_VERSION to $NEXT_VERSION"
 find . -name "pom.xml" | while read pom; do replace_first_version $NEXT_VERSION "$pom"; done
 
 # replace version in files that need it (Dockerfile, README, widgets/page/fragments models used for tests)
+find . -name "package.json" | xargs sed -i "s/${CUR_VERSION}/${NEXT_VERSION}/g"
 find . -name "Dockerfile" | xargs sed -i "s/${CUR_VERSION}/${NEXT_VERSION}/g"
 find . -name "README.md" | xargs sed -i "s/${CUR_VERSION}/${NEXT_VERSION}/g"
 find -regex ".*/e2e/config/.*.js" | xargs sed -i "s/${CUR_VERSION}/${NEXT_VERSION_CUT}/g"

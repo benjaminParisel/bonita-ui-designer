@@ -31,9 +31,6 @@ jobs:
           else
               echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
           fi
-      - name: Checkout release-branch
-#       run: git checkout ${{ github.event.inputs.baseBranch }} && git pull --tags
-        run: git checkout -b make-release
       - name: Update Version
         shell: bash
         run: |
