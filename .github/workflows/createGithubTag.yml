@@ -38,14 +38,12 @@ jobs:
           ./script/update-version.sh ${{ steps.newTagVersion.outputs.value }}
           git commit -a -m "release(${{ steps.newTagVersion.outputs.value }}) create release ${{ steps.newTagVersion.outputs.value }}" && git tag -a ${{ steps.newTagVersion.outputs.value }} -m "Release ${{ steps.newTagVersion.outputs.value }}"
           git push --tags
-          echo "git rev-parse HEAD @~ $(git rev-parse HEAD)"
       - name: changelog
         uses: scottbrenner/generate-changelog-action@master
         id: Changelog
         env:
           REPO: ${{ github.repository }}
       - name: Create Release
-        id: create_release
         uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
