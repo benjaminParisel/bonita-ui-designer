@@ -35,31 +35,24 @@ jobs:
 #       run: git checkout ${{ github.event.inputs.baseBranch }} && git pull --tags
         run: git checkout -b make-release
       - name: Update Version
-        id: updateVersion
         shell: bash
         run: |
           echo ${{ steps.newTagVersion.outputs.value }}
           ./script/update-version.sh ${{ steps.newTagVersion.outputs.value }}
-          git commit -a -m "release(${{ steps.newTagVersion.outputs.value }}) create release ${{ steps.newTagVersion.outputs.value }}"
-          echo "git log $(git log)"
+          git commit -a -m "release(${{ steps.newTagVersion.outputs.value }}) create release ${{ steps.newTagVersion.outputs.value }}" && git tag -a ${{ steps.newTagVersion.outputs.value }} -m "Release ${{ steps.newTagVersion.outputs.value }}"
+          git push --tags
           echo "git rev-parse HEAD @~ $(git rev-parse HEAD)"
-          echo "##[set-output name=lastSha;]$(git rev-parse HEAD)"
       - name: changelog
         uses: scottbrenner/generate-changelog-action@master
         id: Changelog
         env:
           REPO: ${{ github.repository }}
-      - name: logs
-        shell: bash
-        run: echo "lastSha ${{ steps.updateVersion.outputs.lastSha }}"
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          commitish: ${{ steps.updateVersion.outputs.lastSha }}
           tag_name: ${{ steps.newTagVersion.outputs.value }}
           release_name: Release ${{ steps.newTagVersion.outputs.value }}
           body: |
