@@ -8,7 +8,7 @@ on:
         required: true
 jobs:
   createGithubTag:
-    name: Bump Package Version
+    name: Create release
     runs-on: ubuntu-latest
     steps:
       - name: Setup checkout
@@ -20,14 +20,6 @@ jobs:
           git config --local user.email "testBot@users.noreply.github.com"
           git config --local user.name "ui-designer-bot"
           git config pull.rebase true
-      - name: Checkout master
-#        run: git checkout ${{ github.event.inputs.baseBranch }} && git pull --tags
-        run: git checkout ${{ github.ref }}
-      - name: changelog
-        uses: scottbrenner/generate-changelog-action@master
-        id: Changelog
-        env:
-          REPO: ${{ github.repository }}
       - name: Get tag version
         id: newTagVersion
         shell: bash
@@ -39,6 +31,9 @@ jobs:
           else
               echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
           fi
+      - name: Checkout release-branch
+#       run: git checkout ${{ github.event.inputs.baseBranch }} && git pull --tags
+        run: git checkout -b make-release
       - name: Update Version
         id: updateVersion
         shell: bash
@@ -46,8 +41,15 @@ jobs:
           echo ${{ steps.newTagVersion.outputs.value }}
           ./script/update-version.sh ${{ steps.newTagVersion.outputs.value }}
           git commit -a -m "release(${{ steps.newTagVersion.outputs.value }}) create release ${{ steps.newTagVersion.outputs.value }}"
-          echo $(git log)
+          echo "git log $(git log)"
+          echo "git rev-parse HEAD @~ $(git rev-parse HEAD)"
           echo "##[set-output name=lastSha;]$(echo $(git rev-parse HEAD))"
+          echo "lastSha ${{ steps.updateVersion.outputs.lastSha }}"
+      - name: changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
@@ -59,7 +61,7 @@ jobs:
           release_name: Release ${{ steps.newTagVersion.outputs.value }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
-          draft: true
+          draft: false
           prerelease: true
 #      - name: Git Tag
 #        run: git tag ${{github.event.inputs.version}}
