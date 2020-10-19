@@ -2,15 +2,9 @@ name: Build
 
 on:
   push:
-    branch:
-      - master
-      - dev
-      - release-*
+    branch: [master, dev]
   pull_request:
-    branch:
-      - master
-      - dev
-      - release-*
+    branch: [master, dev]
 jobs:
   build:
     runs-on: ubuntu-latest
