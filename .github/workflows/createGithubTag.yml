@@ -43,13 +43,16 @@ jobs:
           git commit -a -m "release(${{ steps.newTagVersion.outputs.value }}) create release ${{ steps.newTagVersion.outputs.value }}"
           echo "git log $(git log)"
           echo "git rev-parse HEAD @~ $(git rev-parse HEAD)"
-          echo "##[set-output name=lastSha;]$(echo $(git rev-parse HEAD))"
-          echo "lastSha ${{ steps.updateVersion.outputs.lastSha }}"
+          echo "##[set-output name=lastSha;]$(git rev-parse HEAD)"
       - name: changelog
         uses: scottbrenner/generate-changelog-action@master
         id: Changelog
         env:
           REPO: ${{ github.repository }}
+      - name: logs
+        shell: bash
+        run: echo "lastSha ${{ steps.updateVersion.outputs.lastSha }}"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
