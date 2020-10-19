@@ -32,11 +32,13 @@ jobs:
         id: newTagVersion
         shell: bash
         run: |
-          if [ $1 = '--next-patch' ]
+          echo ${{  github.event.inputs.version }}
+          if [ ${{ github.event.inputs.version }} = '--next-patch' ]
           then
-              echo "##[set-output name=value;]${./script/next-patch-version.sh}"
+              echo "##[set-output name=value;]$(echo $(./script/next-patch-version.sh))"
+#              echo "::set-output name=value::$(./script/next-patch-version.sh)"
           else
-              echo "##[set-output name=value;]${{ github.event.inputs.version }}"
+               echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
           fi
       - name: Update Version
         shell: bash
