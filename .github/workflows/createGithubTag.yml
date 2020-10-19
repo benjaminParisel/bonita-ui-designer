@@ -28,27 +28,29 @@ jobs:
         id: Changelog
         env:
           REPO: ${{ github.repository }}
-      - name: Update Next Version
+      - name: Get tag version
+        id: newTagVersion
         shell: bash
         run: |
-          NEWVERSION=$(./script/next-patch-version.sh)
-          ./script/update-version.sh ${NEWVERSION}
-          git commit -a -m "release({NEWVERSION}) create release {NEWVERSION}}"
-        if: ${{ github.event.inputs.version }} == '--next-version'
+          if [ $1 = '--next-patch' ]
+          then
+              echo "##[set-output name=value;]$(./script/next-patch-version.sh)
+          else
+              echo "##[set-output name=value;]${{ github.event.inputs.version }}
+          fi
       - name: Update Version
         shell: bash
         run: |
-          ./script/update-version.sh ${{ github.event.inputs.version }}
-          git commit -a -m "release(${{ github.event.inputs.version }}) create release ${{ github.event.inputs.version }}"
-        if: ${{ github.event.inputs.version }} != '--next-version'
+          ./script/update-version.sh ${{ steps.newTagVersion.outputs.value }}
+          git commit -a -m "release(${{ steps.newTagVersion.outputs.value }}) create release ${{ steps.newTagVersion.outputs.value }}"
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: Release ${{ github.event.inputs.version }}
+          tag_name: ${{ steps.newTagVersion.outputs.value }}
+          release_name: Release ${{ steps.newTagVersion.outputs.value }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
           draft: false
