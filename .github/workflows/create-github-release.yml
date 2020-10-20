@@ -6,8 +6,6 @@ on:
         description: new version to release
         default: ''
         required: true
-  repository_dispatch:
-    types: [github-release]
 jobs:
   createGithubRelease:
     name: Create release
@@ -16,16 +14,12 @@ jobs:
       - name: Setup checkout
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GH_RELEASE_TOKEN }}
+          token: ${{ secrets.GH_UID_TOKEN }}
       - name: Config git
         run: |
           git config --local user.email "ui-designer-bot@users.noreply.github.com"
           git config --local user.name "ui-designer-bot"
           git config pull.rebase true
-      - name: Extract parameter
-        shell: bash
-        run: |
-          echo ${{ github.event.client_payload }}
       - name: Update Version
         shell: bash
         run: |
@@ -55,7 +49,7 @@ jobs:
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GH_UID_TOKEN }}
           file:
             backend/webapp/target/{*-standalone.jar,*.war}
           file_glob: true
