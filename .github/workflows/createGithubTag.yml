@@ -1,4 +1,4 @@
-name: Create github tag
+name: Create github Release
 on:
   workflow_dispatch:
     inputs:
@@ -7,7 +7,7 @@ on:
         default: '--next-patch'
         required: true
 jobs:
-  createGithubTag:
+  createGithubRelease:
     name: Create release
     runs-on: ubuntu-latest
     steps:
