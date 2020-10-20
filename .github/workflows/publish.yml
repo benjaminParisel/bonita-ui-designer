@@ -7,7 +7,9 @@ on:
         description: base tag version to publish
         default: 1.11.100
         required: true
-  release:
+  push:
+    tags:
+      - '1.*'
 jobs:
   publishBinaries:
     name: Build, publish and upload binairies
@@ -15,11 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.tagVersion }}
+          ref: ${{ github.event.inputs.tagVersion || github.ref }}
       - name: Set up Java 8
         uses: actions/setup-java@v1
         with:
           java-version: 8
+      - name: test
+        shell: bash
+        run: echo 'toto ${{github.event.inputs.tagVersion}} --- ${{github.ref}}'
 #      - name: Publish artefact
 #        uses: samuelmeuli/action-maven-publish@v1
 #        with:
