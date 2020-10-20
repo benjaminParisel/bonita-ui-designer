@@ -2,7 +2,6 @@ name: Publish binaries
 
 on:
   release:
-    types: [ prereleased, released ]
 jobs:
   publishBinaries:
     name: Build, publish and upload binairies
@@ -15,9 +14,12 @@ jobs:
           java-version: 8
       - name: Only on released
         shell: bash
-        run: echo This is running only on real released ${{ github.event.types }}
-        if: ${{ github.event.types == 'released' }}
-      - name: Build
+        run: echo pre release ${{ github.event.release.prerelease }}
+      - name: Only on released
+        shell: bash
+        run: echo This is running only on real released ${{ github.event.release.prerelease  }}
+        if: ${{ !github.event.release.prerelease }}
+      - name: Build binaries
 #        run: mvn -B verify -Pe2e,integration-test
         run: mvn -B verify -DskipTests
 #      - name: Publish artefact
