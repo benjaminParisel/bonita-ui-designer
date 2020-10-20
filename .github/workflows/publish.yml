@@ -1,35 +1,39 @@
 name: Publish binaries
 
 on:
-  release:
-    types: [created, published, released]
+  workflow_dispatch:
+    inputs:
+      tagVersion:
+        description: base tag version to publish
+        default: 1.11.100
+        required: true
+      publishBinaries :
+        description: true to publish binaries on repostiories (maven central)
+        default: false
+        required: true
 jobs:
   publishBinaries:
     name: Build, publish and upload binairies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.tagVersion }}
       - name: Set up Java 8
         uses: actions/setup-java@v1
         with:
           java-version: 8
-      - name: Only on released
-        shell: bash
-        run: echo pre release ${{ github.event.release.prerelease }}
-      - name: Only on released
-        shell: bash
-        run: echo This is running only on real released ${{ github.event.release.prerelease  }}
-        if: ${{ !github.event.release.prerelease }}
       - name: Build binaries
 #        run: mvn -B verify -Pe2e,integration-test
         run: mvn -B verify -DskipTests
-#      - name: Publish artefact
-#        uses: samuelmeuli/action-maven-publish@v1
-#        with:
-#          gpg_private_key: ${{ secrets.gpg_private_key }}
-#          gpg_passphrase: ${{ secrets.gpg_passphrase }}
-#          nexus_username: ${{ secrets.ossrh_username }}
-#          nexus_password: ${{ secrets.ossrh_password }}
+      - name: Publish artefact
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          gpg_private_key: ${{ secrets.gpg_private_key }}
+          gpg_passphrase: ${{ secrets.gpg_passphrase }}
+          nexus_username: ${{ secrets.ossrh_username }}
+          nexus_password: ${{ secrets.ossrh_password }}
+        if: ${{ github.event.inputs.publishBinaries == 'true'}}
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -37,5 +41,5 @@ jobs:
           file:
             backend/{webapp/target/*-standalone.jar, webapp/target/*.war, contract/target/!(*-tests).jar}
           file_glob: true
-          tag: ${{ github.ref }}
+          tag: ${{ github.event.inputs.tagVersion }}
           overwrite: true
