@@ -6,6 +6,8 @@ on:
         description: new version to release
         default: ''
         required: true
+  repository_dispatch:
+    types: [github-release]
 jobs:
   createGithubRelease:
     name: Create release
@@ -20,6 +22,10 @@ jobs:
           git config --local user.email "ui-designer-bot@users.noreply.github.com"
           git config --local user.name "ui-designer-bot"
           git config pull.rebase true
+      - name: Extract parameter
+        shell: bash
+        run: |
+          echo ${{ github.event.client_payload }}
       - name: Update Version
         shell: bash
         run: |

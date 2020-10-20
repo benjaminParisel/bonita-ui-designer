@@ -16,37 +16,60 @@ on:
         required: true
         default: 'true'
 jobs:
+  getReleaseVersion:
+    runs-on: ubuntu-latest
+    output:
+      releaseVersion: ${{ steps.newTagVersion.outputs.value }}
+    steps:
+      - name: Setup checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_UID_TOKEN }}
+      - name: Get tag version
+        id: newTagVersion
+        shell: bash
+        run: |
+          if [ ${{ github.event.inputs.version }} = '--next-patch' ]
+          then
+              echo "##[set-output name=value;]$(echo $(./script/next-patch-version.sh))"
+          else
+              echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
+          fi
+
   createRelease:
     runs-on: ubuntu-latest
+    needs: getReleaseVersion
     steps:
      - name: Setup checkout
        uses: actions/checkout@v2
        with:
         token: ${{ secrets.GH_UID_TOKEN }}
-     - name: Get tag version
-       id: newTagVersion
-       shell: bash
-       run: |
-         if [ ${{ github.event.inputs.version }} = '--next-patch' ]
-         then
-             echo "##[set-output name=value;]$(echo $(./script/next-patch-version.sh))"
-         else
-             echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
-         fi
-     - name: create github release
-       uses: benc-uk/workflow-dispatch@v1.1
+     - name: Repository Dispatch - create github release
+       uses: peter-evans/repository-dispatch@v1
        with:
-         workflow: Create github Release
          token: ${{ secrets.GH_UID_TOKEN }}
-         inputs: '{ "version": "${{ steps.newTagVersion.outputs.value }}" }'
-         ref: ${{github.ref}}
+         event-type: github-release
+#     - name: create github release
+#       uses: benc-uk/workflow-dispatch@v1.1
+#       with:
+#         workflow: Create github Release
+#         token: ${{ secrets.GH_UID_TOKEN }}
+#         inputs: '{ "version": "${{ needs.getReleaseVersion.outputs.releaseVersion }}" }'
+#         ref: ${{github.ref}}
        if: ${{ github.event.inputs.pushGithubRelease == 'true' }}
+
+
+   publishBinaries:
+     runs-on: ubuntu-latest
+     needs: [getReleaseVersion,createRelease]
+     steps:
      - name: Publish Binaries
        uses: benc-uk/workflow-dispatch@v1.1
        with:
          workflow: Publish binaries
          token: ${{ secrets.GH_UID_TOKEN }}
-         inputs: '{ "tagVersion": "${{ steps.newTagVersion.outputs.value }}" }'
+         inputs: '{ "tagVersion": "${{ needs.getReleaseVersion.outputs.releaseVersion }}" }'
          ref: ${{github.ref}}
        if: ${{ github.event.inputs.publishBinaries == 'true' }}
+
 
