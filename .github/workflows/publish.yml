@@ -1,7 +1,8 @@
 name: Publish binaries
 
 on:
-  release:
+  release: [created, published, released]
+
 jobs:
   publishBinaries:
     name: Build, publish and upload binairies
