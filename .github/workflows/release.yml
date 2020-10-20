@@ -22,7 +22,7 @@ jobs:
      - name: Setup checkout
        uses: actions/checkout@v2
        with:
-        token: ${{ secrets.GH_RELEASE_TOKEN }}
+        token: ${{ secrets.GH_UID_TOKEN }}
      - name: Get tag version
        id: newTagVersion
        shell: bash
@@ -37,7 +37,7 @@ jobs:
        uses: benc-uk/workflow-dispatch@v1.1
        with:
          workflow: Create github Release
-         token: ${{ secrets.GH_RELEASE_TOKEN }}
+         token: ${{ secrets.GH_UID_TOKEN }}
          inputs: '{ "version": "${{ steps.newTagVersion.outputs.value }}" }'
          ref: ${{github.ref}}
        if: ${{ github.event.inputs.pushGithubRelease == 'true' }}
@@ -45,7 +45,7 @@ jobs:
        uses: benc-uk/workflow-dispatch@v1.1
        with:
          workflow: Publish binaries
-         token: ${{ secrets.GH_RELEASE_TOKEN }}
+         token: ${{ secrets.GH_UID_TOKEN }}
          inputs: '{ "tagVersion": "${{ steps.newTagVersion.outputs.value }}" }'
          ref: ${{github.ref}}
        if: ${{ github.event.inputs.publishBinaries == 'true' }}
