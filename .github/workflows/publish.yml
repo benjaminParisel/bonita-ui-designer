@@ -15,12 +15,13 @@ jobs:
         with:
           java-version: 8
       - name: Build
-        run: mvn -B verify -Pe2e,integration-test
+#        run: mvn -B verify -Pe2e,integration-test
+        run: mvn -B verify -DskipTests
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: backend/webapp/target/*-standelone.jar
-          asset_name: ui-designer-$tag-standelone.jar
+          file: backend/webapp/target/*-standalone.jar
+          asset_name: ui-designer-$tag-standalone.jar
           tag: ${{ github.ref }}
           overwrite: true
