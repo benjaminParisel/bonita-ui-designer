@@ -1,9 +1,8 @@
 name: Publish binaries
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [ prereleased, released ]
 jobs:
   publishBinaries:
     name: Build, publish and upload binairies
@@ -14,15 +13,31 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
+      - name: Only on released
+        shell: bash
+        run: |
+        echo 'This is running only on real released || ${{ github.event.types }}'
+      if: ${{ github.event.types == 'released' }}
       - name: Build
 #        run: mvn -B verify -Pe2e,integration-test
         run: mvn -B verify -DskipTests
+#      - name: Publish artefact
+#        uses: samuelmeuli/action-maven-publish@v1
+#        with:
+#          gpg_private_key: ${{ secrets.gpg_private_key }}
+#          gpg_passphrase: ${{ secrets.gpg_passphrase }}
+#          nexus_username: ${{ secrets.ossrh_username }}
+#          nexus_password: ${{ secrets.ossrh_password }}
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file:
-            backend/webapp/target/{*-standalone.jar,*.war}
+            {
+             backend/webapp/target/*-standalone.jar,
+             backend/webapp/target/*.war,
+             backend/contract/target/!(*-tests).jar,
+            }
           file_glob: true
           tag: ${{ github.ref }}
           overwrite: true
