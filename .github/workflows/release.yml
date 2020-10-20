@@ -5,8 +5,8 @@ on:
     inputs:
       version:
         description: Bump Version - keep --next-patch to bump patch digit
-          default: '--next-patch'
-          required: true
+        default: '--next-patch'
+        required: true
       pushGithubRelease:
         description: true to push a github release
         required: true
@@ -36,17 +36,17 @@ jobs:
      - name: create github release
        uses: benc-uk/workflow-dispatch@v1.1
        with:
-         workflow: createGithubRelease
+         workflow: Create github Release
          token: ${{ secrets.GH_RELEASE_TOKEN }}
          inputs: '{ "version": "${{ steps.newTagVersion.outputs.value }}" }'
          ref: ${{github.ref}}
-       if: ${{ github.event.inputs.pushGithubTag }}
+       if: ${{ github.event.inputs.pushGithubTag == 'true' }}
      - name: Publish Binaries
        uses: benc-uk/workflow-dispatch@v1.1
        with:
-         workflow: publishBinaries
+         workflow: Publish binaries
          token: ${{ secrets.GH_RELEASE_TOKEN }}
-         inputs: '{ "version": "${{ steps.newTagVersion.outputs.value }}" }'
+         inputs: '{ "tagVersion": "${{ steps.newTagVersion.outputs.value }}" }'
          ref: ${{github.ref}}
-       if: ${{ github.event.inputs.publishBinaries }}
+       if: ${{ github.event.inputs.publishBinaries == 'true' }}
 
