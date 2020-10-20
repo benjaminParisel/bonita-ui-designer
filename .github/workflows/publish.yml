@@ -1,11 +1,12 @@
-createRelease: Publish binaries
+name: Publish binaries
+
 on:
   push:
     tags:
       - '*'
 jobs:
   publishBinaries:
-    name: Build and publish binairies
+    name: Build, publish and upload binairies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -14,7 +15,7 @@ jobs:
         with:
           java-version: 8
       - name: Build
-        run: mvn -B deploy -Pe2e,integration-test
+        run: mvn -B verify -Pe2e,integration-test
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
