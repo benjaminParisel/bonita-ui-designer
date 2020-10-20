@@ -3,8 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Bump Version - keep --next-version to bump patch digit
-        default: '--next-patch'
+        description: new version to release
+        default: ''
         required: true
 jobs:
   createGithubRelease:
@@ -20,23 +20,11 @@ jobs:
           git config --local user.email "ui-designer-bot@users.noreply.github.com"
           git config --local user.name "ui-designer-bot"
           git config pull.rebase true
-      - name: Get tag version
-        id: newTagVersion
-        shell: bash
-        run: |
-          echo ${{  github.event.inputs.version }}
-          if [ ${{ github.event.inputs.version }} = '--next-patch' ]
-          then
-              echo "##[set-output name=value;]$(echo $(./script/next-patch-version.sh))"
-          else
-              echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
-          fi
       - name: Update Version
         shell: bash
         run: |
-          echo ${{ steps.newTagVersion.outputs.value }}
-          ./script/update-version.sh ${{ steps.newTagVersion.outputs.value }}
-          git commit -a -m "other(${{ steps.newTagVersion.outputs.value }}) create release ${{ steps.newTagVersion.outputs.value }}" && git tag -a ${{ steps.newTagVersion.outputs.value }} -m "Release ${{ steps.newTagVersion.outputs.value }}"
+          ./script/update-version.sh ${{ github.event.inputs.version }}
+          git commit -a -m "other(${{ github.event.inputs.version }}) create release ${{ github.event.inputs.version }}" && git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
           git push --tags
       - name: changelog
         uses: scottbrenner/generate-changelog-action@master
@@ -49,9 +37,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ steps.newTagVersion.outputs.value }}
-          release_name: Release ${{ steps.newTagVersion.outputs.value }}
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
           draft: false
           prerelease: true
+      - name: Build binaries
+#        run: mvn -B verify -Pe2e,integration-test
+        run: mvn -B verify -DskipTests
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file:
+            backend/webapp/target/{*-standalone.jar,*.war}
+          file_glob: true
+          tag: ${{ github.event.inputs.version }}
+          overwrite: true

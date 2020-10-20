@@ -1,0 +1,52 @@
+name: UI-Designer Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Bump Version - keep --next-patch to bump patch digit
+          default: '--next-patch'
+          required: true
+      pushGithubRelease:
+        description: true to push a github release
+        required: true
+        default: 'true'
+      publishBinaries:
+        description: true to Publish binaries
+        required: true
+        default: 'true'
+jobs:
+  createRelease:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Setup checkout
+       uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.GH_RELEASE_TOKEN }}
+     - name: Get tag version
+       id: newTagVersion
+       shell: bash
+       run: |
+         if [ ${{ github.event.inputs.version }} = '--next-patch' ]
+         then
+             echo "##[set-output name=value;]$(echo $(./script/next-patch-version.sh))"
+         else
+             echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
+         fi
+     - name: create github release
+       uses: benc-uk/workflow-dispatch@v1.1
+       with:
+         workflow: createGithubRelease
+         token: ${{ secrets.GH_RELEASE_TOKEN }}
+         inputs: '{ "version": "${{ steps.newTagVersion.outputs.value }}" }'
+         ref: ${{github.ref}}
+       if: ${{ github.event.inputs.pushGithubTag }}
+     - name: Publish Binaries
+       uses: benc-uk/workflow-dispatch@v1.1
+       with:
+         workflow: publishBinaries
+         token: ${{ secrets.GH_RELEASE_TOKEN }}
+         inputs: '{ "version": "${{ steps.newTagVersion.outputs.value }}" }'
+         ref: ${{github.ref}}
+       if: ${{ github.event.inputs.publishBinaries }}
+
