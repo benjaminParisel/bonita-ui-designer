@@ -40,7 +40,7 @@ jobs:
          token: ${{ secrets.GH_RELEASE_TOKEN }}
          inputs: '{ "version": "${{ steps.newTagVersion.outputs.value }}" }'
          ref: ${{github.ref}}
-       if: ${{ github.event.inputs.pushGithubTag == 'true' }}
+       if: ${{ github.event.inputs.pushGithubRelease == 'true' }}
      - name: Publish Binaries
        uses: benc-uk/workflow-dispatch@v1.1
        with:
