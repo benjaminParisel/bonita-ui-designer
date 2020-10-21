@@ -1,0 +1,25 @@
+name: Test repo dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: new version to release (keep --next-path to bump version)
+        default: --next-patch
+        required: true
+  repository_dispatch:
+     types: [ github-release]
+jobs:
+  DisplayParam:
+    name: DisplayParam
+    runs-on: ubuntu-latest
+    steps:
+      - name: extract
+        id: initParameter
+        run: |
+          sleep 10;
+          if [ ${{ github.event.action }} == 'github-release' ]
+            then
+                echo "github.event.client_payload.baseBranch ${{github.event.client_payload.baseBranch}}"
+            else
+                echo "github.ref ${{ github.ref }})"
+            fi

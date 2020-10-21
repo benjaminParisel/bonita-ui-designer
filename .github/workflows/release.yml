@@ -16,10 +16,12 @@ on:
         required: true
         default: 'true'
 jobs:
-  getReleaseVersion:
+  release:
     runs-on: ubuntu-latest
     outputs:
       releaseVersion: ${{ steps.newTagVersion.outputs.value }}
+    strategy:
+      max-parallel: 1
     steps:
       - name: Setup checkout
         uses: actions/checkout@v2
@@ -35,20 +37,34 @@ jobs:
           else
               echo "##[set-output name=value;]$(echo ${{ github.event.inputs.version }})"
           fi
-  createRelease:
-    runs-on: ubuntu-latest
-    needs: getReleaseVersion
-    steps:
-     - name: Setup checkout
-       uses: actions/checkout@v2
-       with:
-        token: ${{ secrets.GH_UID_TOKEN }}
-     - name: Repository Dispatch - create github release
-       uses: peter-evans/repository-dispatch@v1
-       with:
-         token: ${{ secrets.GH_UID_TOKEN }}
-         event-type: github-release
-         client-payload: '{"releaseVersion": "${{ needs.getReleaseVersion.outputs.releaseVersion }}", "publishBinaries": "${{ github.event.inputs.publishBinaries }}"}'
+      - name: Repository Dispatch - create github release
+        if: ${{ success() }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GH_UID_TOKEN }}
+          event-type: github-release
+          client-payload: '{"baseBranch":"${{ github.ref }}", "releaseVersion": "${{ steps.newTagVersion.outputs.value }}", "publishBinaries": "${{ github.event.inputs.publishBinaries }}"}'
+      - name: Repository Dispatch - publish artefact
+        if: ${{ success() }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GH_UID_TOKEN }}
+          event-type: github-publish
+          client-payload: '{"baseBranch":"${{ github.ref }}", "releaseVersion": "${{ steps.newTagVersion.outputs.value }}"}'
+#  createRelease:
+#    runs-on: ubuntu-latest
+#    needs: getReleaseVersion
+#    steps:
+#     - name: Setup checkout
+#       uses: actions/checkout@v2
+#       with:
+#        token: ${{ secrets.GH_UID_TOKEN }}
+#     - name: Repository Dispatch - create github release
+#       uses: peter-evans/repository-dispatch@v1
+#       with:
+#         token: ${{ secrets.GH_UID_TOKEN }}
+#         event-type: github-release
+#         client-payload: '{"releaseVersion": "${{ needs.getReleaseVersion.outputs.releaseVersion }}", "publishBinaries": "${{ github.event.inputs.publishBinaries }}"}'
 #     - name: create github release
 #       uses: benc-uk/workflow-dispatch@v1.1
 #       with:
