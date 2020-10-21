@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: new version to release (keep --next-path to bump version
+        description: new version to release (keep --next-path to bump version)
         default: '--next-patch'
         required: true
 jobs:
@@ -24,7 +24,7 @@ jobs:
         id: newTagVersion
         shell: bash
         run: |
-          if [ ${{ github.event.inputs.version }} = '--next-patch' ]
+          if [ ${{ github.event.inputs.version }} == '--next-patch' || -z "${{ github.event.inputs.version }}" ]
           then
               echo "##[set-output name=value;]$(echo $(./script/next-patch-version.sh))"
           else
@@ -53,12 +53,9 @@ jobs:
             ${{ steps.Changelog.outputs.changelog }}
           draft: false
           prerelease: true
-      - name: Send message to Slack channel
+      - uses: act10ns/slack@v1
         if: ${{ failure() }}
-        uses: archive/github-actions-slack@v1.0.4
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK }}
         with:
-          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
-          #          For now it's on private slack
-          slack-channel: test-gh-action
-          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Take a look...
-          slack-optional-icon_emoji: ":fire:"
+          status: ${{ job.status }}
