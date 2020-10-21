@@ -1,0 +1,50 @@
+name: Push new version to studio repository
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: new version to release (keep --next-path to bump version)
+        default: '--next-patch'
+        required: true
+      baseBranche:
+        description: master || dev (Studio Base branch to update)
+        default: 'master'
+        required: true
+  repository_dispatch:
+     types: [ github-studio-pr ]
+jobs:
+  DisplayParam:
+    name: DisplayParam
+    runs-on: ubuntu-latest
+    steps:
+      - name: Init
+        id: init
+        run: |
+          if [ ${{ github.event.action }} == 'github-studio-pr' ]
+          then
+              echo "##[set-output name=tagVersion;]$(echo ${{ github.event.client_payload.releaseVersion }})"
+              echo "##[set-output name=studioBaseBranch;]$(echo ${{ github.event.client_payload.baseBranch }})"
+          else
+              echo "##[set-output name=tagVersion;]$(echo ${{ github.event.inputs.version }})"
+              echo "##[set-output name=studioBaseBranch;]$(echo ${{ github.event.inputs.baseBranche }})"
+              echo "github.ref => ${{ github.ref }})"
+          fi
+      - name: Print parameter
+        id: initParameter
+        run: |
+          echo "studioBaseBranch => ${{ steps.init.outputs.studioBaseBranch}}"
+          echo "tagVersion => ${{ steps.init.outputs.tagVersion}}"
+#                steps:
+#        - name: Check out Studio repository
+#          uses: actions/checkout@master
+#          with:
+#            repository: bonitasoft/bonita-studio-sp
+#            token: ${{ secrets.GH_UID_TOKEN }}
+#        - name: Open PR
+#          shell: bash
+#          run: |
+#            ./releng/update_uid_version.sh ${{}} \
+#                            --branch-name=${params.BASE_BRANCH} \
+#                            --github-api-token=${GITHUB_API_TOKEN} \
+#                            --git-user=${GIT_USERNAME} \
+#                            --git-password=${GIT_PASSWORD}
