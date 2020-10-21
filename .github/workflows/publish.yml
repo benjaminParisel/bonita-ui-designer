@@ -22,16 +22,28 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
-      - name: test
-        shell: bash
-        run: echo 'toto ${{github.event.inputs.tagVersion}} --- ${{github.ref}}'
-      - name: test 2
-        run: mvn -B clean install -DskipTests
-#      - name: Publish artefact
-#        uses: samuelmeuli/action-maven-publish@v1
-#        with:
-#          gpg_private_key: ${{ secrets.gpg_private_key }}
-#          gpg_passphrase: ${{ secrets.gpg_passphrase }}
-#          nexus_username: ${{ secrets.ossrh_username }}
-#          nexus_password: ${{ secrets.ossrh_password }}
-#        if: ${{ github.event.release.prerelease == 'false'}}
+      - name: Publish artefact
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          gpg_private_key: ${{ secrets.gpg_private_key }}
+          gpg_passphrase: ${{ secrets.gpg_passphrase }}
+          nexus_username: ${{ secrets.ossrh_username }}
+          nexus_password: ${{ secrets.ossrh_password }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_UID_TOKEN }}
+          file:
+            backend/webapp/target/{*-standalone.jar,*.war}
+          file_glob: true
+          tag: ${{ github.event.inputs.version }}
+          overwrite: true
+      - name: Send message to Slack channel
+        if: ${{ failure() }}
+        uses: archive/github-actions-slack@v1.0.4
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
+          #          For now it's on private slack
+          slack-channel: test-gh-action
+          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Take a look...
+          slack-optional-icon_emoji: ":fire:"
