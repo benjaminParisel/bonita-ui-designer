@@ -38,12 +38,18 @@ jobs:
           file_glob: true
           tag: ${{ github.event.inputs.version }}
           overwrite: true
-      - name: Send message to Slack channel
+#      - name: Send message to Slack channel
+#        if: ${{ failure() }}
+#        uses: archive/github-actions-slack@v1.0.4
+#        with:
+#          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
+#          #          For now it's on private slack
+#          slack-channel: test-gh-action
+#          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Take a look...
+#          slack-optional-icon_emoji: ":fire:"
+      - uses: act10ns/slack@v1
         if: ${{ failure() }}
-        uses: archive/github-actions-slack@v1.0.4
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.INCOMING_WEBHOOK }}
         with:
-          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_WEBHOOK_URL }}
-          #          For now it's on private slack
-          slack-channel: test-gh-action
-          slack-text: Hello! Something is burning on https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }} ! Take a look...
-          slack-optional-icon_emoji: ":fire:"
+          status: ${{ job.status }}
