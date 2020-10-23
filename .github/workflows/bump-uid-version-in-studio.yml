@@ -1,20 +1,20 @@
-name: Push new version to studio repository
+name: Open Studio PR
 on:
   workflow_dispatch:
     inputs:
       version:
         description: new version to release (keep --next-path to bump version)
-        default: '--next-patch'
+        default: --next-patch
         required: true
       baseBranche:
         description: master || dev (Studio Base branch to update)
-        default: 'master'
+        default: master
         required: true
   repository_dispatch:
      types: [ github-studio-pr ]
 jobs:
-  DisplayParam:
-    name: DisplayParam
+  openStudioPR:
+    name: Init Parameters
     runs-on: ubuntu-latest
     steps:
       - name: Init
@@ -27,24 +27,23 @@ jobs:
           else
               echo "##[set-output name=tagVersion;]$(echo ${{ github.event.inputs.version }})"
               echo "##[set-output name=studioBaseBranch;]$(echo ${{ github.event.inputs.baseBranche }})"
-              echo "github.ref => ${{ github.ref }})"
           fi
       - name: Print parameter
         id: initParameter
         run: |
           echo "studioBaseBranch => ${{ steps.init.outputs.studioBaseBranch}}"
           echo "tagVersion => ${{ steps.init.outputs.tagVersion}}"
-#                steps:
-#        - name: Check out Studio repository
-#          uses: actions/checkout@master
-#          with:
-#            repository: bonitasoft/bonita-studio-sp
-#            token: ${{ secrets.GH_UID_TOKEN }}
-#        - name: Open PR
-#          shell: bash
-#          run: |
-#            ./releng/update_uid_version.sh ${{}} \
-#                            --branch-name=${params.BASE_BRANCH} \
-#                            --github-api-token=${GITHUB_API_TOKEN} \
-#                            --git-user=${GIT_USERNAME} \
-#                            --git-password=${GIT_PASSWORD}
+          -
+      - name: Check out Studio repository
+        uses: actions/checkout@master
+        with:
+          repository: bonitasoft/bonita-studio-sp
+          token: ${{ secrets.GH_UID_TOKEN }}
+#      - name: Open Studio PR
+#        shell: bash
+#        run: |
+#          ./releng/update_uid_version.sh ${{ steps.init.outputs.tagVersion }} \
+#                          --branch-name=${{ steps.init.outputs.studioBaseBranch }} \
+#                          --github-api-token=${{ secret.GITHUB_API_TOKEN }} \
+#                          --git-user=${{ secret.GIT_USERNAME }} \
+#                          --git-password=${{ secret.GIT_PASSWORD }}
