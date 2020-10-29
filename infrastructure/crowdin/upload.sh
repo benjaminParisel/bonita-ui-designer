@@ -74,39 +74,8 @@ for i in "$@"; do
         ;;
     esac
 done
-if [ -z "$CROWDINKEY" ]; then
-  echo "ERROR crowdin API key is needed";
-  usage;
-fi
 
-# $1 files
-# $2 export_pattern
-upload_sources() {
-  # add file in case it does not exists yet
-  curl --silent -o /dev/null -F "$1" -F "$2" -F "$3" https://api.crowdin.com/api/project/$PROJECT/add-file?key=$CROWDINKEY
 
-  # update file
-  curl -F "$1" -F "$2" -F "$3" https://api.crowdin.com/api/project/$PROJECT/update-file?key=$CROWDINKEY
-}
-
-# $1 directory path
-add_crowdin_directory() {
-  curl --silent -o /dev/null -F "name=$1" https://api.crowdin.com/api/project/$PROJECT/add-directory?key=$CROWDINKEY
-}
-
-# $1 crowdin target language
-# $2 UI Designer language
-upload_translations() {
-  echo "Exporting $1 translation to $PROJECT crowdin project ..."
-
-   curl -F "files[ui-designer/lang-template.pot]=@backend/webapp/src/main/resources/i18n/lang-template-$2.po" \
-       -F "language=$1" \
-       -F "auto_approve_imported=1" \
-       -F "import_duplicates=1" \
-       -F "import_eq_suggestions=1" \
-       -F "branch=$BRANCH_NAME" \
-	  https://api.crowdin.com/api/project/$PROJECT/upload-translation?key=$CROWDINKEY
-}
 
 echo "***********************************************************************************"
 echo "UI DESIGNER TRANSLATION UPLOAD"
@@ -126,17 +95,5 @@ npm_pot backend/webapp/
 echo "Concatenating pot files..."
 cat_pot $BASE_DIR $BUILD_DIR/lang_template.pot
 
-add_crowdin_directory "$BRANCH_NAME/ui-designer"
-echo "Uploading pot to $PROJECT crowdin project ..."
-upload_sources \
-    "files[ui-designer/lang-template.pot]=@$BUILD_DIR/lang_template.pot" \
-    "branch=$BRANCH_NAME" \
-    "export_patterns[ui-designer/lang-template.pot]=/ui-designer/community/lang-template-%locale%.po"
 
-if [ "$UPLOAD_TRANS" = true ]
-then
-  upload_translations fr fr-FR
-  upload_translations es-ES es-ES
-  upload_translations ja ja-JP
-  upload_translations pt-BR pt-BR
-fi
+echo "Uploading pot to $PROJECT crowdin project ..."
